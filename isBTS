@@ -1,0 +1,74 @@
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <limits>
+#include <climits>
+using namespace std;
+
+struct Node {
+    long long key;    
+    int parent;      
+    char direction;   
+};
+
+bool isBST(int n, const vector<Node>& nodes) {
+    vector<long long> minRange(n, LLONG_MIN);
+    vector<long long> maxRange(n, LLONG_MAX);
+
+    for (int i = 1; i < n; ++i) {
+        int parent = nodes[i].parent;
+
+        if (parent < 0 || parent >= n) {
+            return false;
+        }
+
+        if (nodes[i].direction == 'L') {
+            if (nodes[i].key >= nodes[parent].key) {
+                return false;
+            }
+            maxRange[i] = nodes[parent].key;
+            minRange[i] = minRange[parent];
+        } else if (nodes[i].direction == 'R') {
+            if (nodes[i].key < nodes[parent].key) {
+                return false;
+            }
+            minRange[i] = nodes[parent].key;
+            maxRange[i] = maxRange[parent];
+        }
+
+        if (nodes[i].key < minRange[i] || nodes[i].key >= maxRange[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+int main() {
+    ifstream inputFile("bst.in");
+    ofstream outputFile("bst.out");
+
+    int n;
+    inputFile >> n;
+    if (n == 1) {
+        outputFile << "YES";
+        return 0;
+    }
+
+    vector<Node> nodes(n);
+    inputFile >> nodes[0].key;
+    nodes[0].parent = -1;
+
+    for (int i = 1; i < n; ++i) {
+        inputFile >> nodes[i].key >> nodes[i].parent >> nodes[i].direction;
+        nodes[i].parent--; 
+    }
+
+    if (isBST(n, nodes)) {
+        outputFile << "YES";
+    } else {
+        outputFile << "NO";
+    }
+
+    return 0;
+}
