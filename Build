@@ -1,0 +1,110 @@
+#include <iostream>
+#include <fstream>
+using namespace std;
+
+ifstream in("input.txt");
+ofstream out("output.txt");
+
+class Koren {
+private:
+    int key;
+    Koren* left, * right;
+public:
+    Koren(int item) {
+        key = item;
+        left = right = nullptr;
+    }
+    int getKey() {
+        return key;
+    }
+    Koren *GetLeftKoren() {
+        return left;
+    }
+    Koren* GetRightKoren() {
+        return right;
+    }
+    void SetRightKoren(Koren *koren) {
+        right = koren;
+    }
+    void SetLeftKoren(Koren *koren) {
+        left = koren;
+    }
+    void SetKey(int Key) {
+        key = Key;
+    }
+};
+
+Koren* insert(Koren* koren, int key) {
+    if (koren == nullptr) {
+        return new Koren(key);
+    }
+
+    if (key < koren->getKey())
+        koren->SetLeftKoren(insert(koren->GetLeftKoren(), key));
+    else if (key > koren->getKey())
+        koren->SetRightKoren(insert(koren->GetRightKoren(), key));
+
+    return koren;
+}
+
+Koren* minValueKoren(Koren* koren) {
+    Koren* current = koren;
+
+    while (current && current->GetLeftKoren() != nullptr)
+        current = current->GetLeftKoren();
+
+    return current;
+}
+
+Koren* deleteKoren(Koren* root, int key) {
+    if (root == nullptr)
+        return root;
+
+    if (key < root->getKey())
+        root->SetLeftKoren(deleteKoren(root->GetLeftKoren(), key));
+    else if (key > root->getKey())
+        root->SetRightKoren(deleteKoren(root->GetRightKoren(), key));
+    else {
+        if (root->GetLeftKoren() == nullptr) {
+            Koren* temp = root->GetRightKoren();
+            delete root;
+            return temp;
+        }
+        else if (root->GetRightKoren() == nullptr) {
+            Koren* temp = root->GetLeftKoren();
+            delete root;
+            return temp;
+        }
+
+        Koren* temp = minValueKoren(root->GetRightKoren());
+
+        root->SetKey(temp->getKey());
+
+        root->SetRightKoren(deleteKoren(root->GetRightKoren(), temp->getKey()));
+    }
+
+    return root;
+}
+
+void Print(Koren* root) {
+    if (root != nullptr) {
+        out << root->getKey() << endl;
+        Print(root->GetLeftKoren());
+        Print(root->GetRightKoren());
+    }
+}
+
+int main() {
+
+    Koren* root = nullptr;
+
+    int key;
+    while (in >> key) {
+        root = insert(root, key);
+    }
+
+
+    Print(root);
+
+    return 0;
+}
